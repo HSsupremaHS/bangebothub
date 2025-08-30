@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synapse</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        :root {
+            --black: #1a1a1a;
+            --white: #f0f0f0;
+            --gray: #888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: transparent;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+
+        header.scrolled {
+            background-color: var(--black);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            color: var(--white);
+            animation: fadeIn 1.5s ease;
+        }
+
+        header nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        header nav ul li {
+            margin-left: 40px;
+            opacity: 0;
+            animation: slideInRight 1s ease forwards;
+        }
+        
+        header nav ul li:nth-child(1) { animation-delay: 0.2s; }
+        header nav ul li:nth-child(2) { animation-delay: 0.4s; }
+        header nav ul li:nth-child(3) { animation-delay: 0.6s; }
+        header nav ul li:nth-child(4) { animation-delay: 0.8s; }
+
+        header nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 700;
+            position: relative;
+        }
+
+        header nav ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 100%;
+            height: 2px;
+            background-color: var(--white);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        header nav ul li a:hover::after {
+            transform: scaleX(1);
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: #000;
+            position: relative;
+        }
+
+        .hero .content {
+            opacity: 0;
+            animation: fadeIn 2s ease forwards;
+            animation-delay: 1.5s;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: glitch 2s infinite;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        section {
+            padding: 100px 0;
+            border-top: 1px solid var(--gray);
+            transition: opacity 0.5s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        #about p, #support p {
+            max-width: 800px;
+            margin: auto;
+            text-align: justify;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .product-card {
+            background: #111;
+            padding: 40px;
+            text-align: center;
+            border-radius: 5px;
+            border: 1px solid var(--gray);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .product-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            position: relative;
+        }
+
+        .product-card h3::before {
+            content: '// ';
+            color: var(--gray);
+        }
+
+        .product-card p {
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            color: var(--gray);
+        }
+
+        .buy-btn {
+            display: inline-block;
+            background: var(--white);
+            color: var(--black);
+            padding: 12px 30px;
+            text-decoration: none;
+            border: 2px solid var(--white);
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .buy-btn:hover {
+            background: transparent;
+            color: var(--white);
+        }
+
+        .staff-scroll-container {
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 20px 0;
+        }
+
+        .staff-scroll {
+            display: inline-block;
+            animation: scroll-left-to-right 25s linear infinite;
+        }
+        
+        .staff-scroll:hover {
+            animation-play-state: paused;
+        }
+
+        .staff-member {
+            display: inline-block;
+            width: 250px;
+            text-align: center;
+            padding: 20px;
+            margin: 0 15px;
+        }
+
+        .staff-member img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gray);
+            filter: grayscale(100%);
+            transition: filter 0.3s ease;
+        }
+        
+        .staff-member:hover img {
+            filter: grayscale(0%);
+        }
+
+        .staff-member h4 {
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        .staff-member p {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        footer {
+            background-color: var(--black);
+            border-top: 1px solid var(--gray);
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px 0 var(--white), -2px -2px 0 var(--white); }
+            10% { text-shadow: -2px -2px 0 var(--white), 2px 2px 0 var(--white); }
+            20% { text-shadow: 2px 2px 0 var(--white), -2px -2px 0 var(--white); }
+            30% { text-shadow: -2px -2px 0 var(--white), 2px 2px 0 var(--white); }
+            40% { text-shadow: 2px 2px 0 var(--white), -2px -2px 0 var(--white); }
+            50% { text-shadow: none; }
+            100% { text-shadow: none; }
+        }
+
+        @keyframes scroll-left-to-right {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+            }
+            header h1 {
+                margin-bottom: 1rem;
+            }
+            header nav ul li {
+                margin: 0 10px;
+            }
+            .hero h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>SYПAPSE</h1>
+            <nav>
+                <ul>
+                    <li><a href="#about">Chi Siamo</a></li>
+                    <li><a href="#shop">Shop</a></li>
+                    <li><a href="#staff">Staff</a></li>
+                    <li><a href="#support">Supporto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container content">
+            <h2>> CREIAMO L'INNOVazione</h2>
+            <p>Connettiamo le idee al digitale. Soluzioni professionali e su misura per la tua presenza online.</p>
+        </div>
+    </section>
+
+    <section id="about" class="fade-in">
+        <div class="container">
+            <h2>// CHI SIAMO</h2>
+            <p>Synapse nasce dalla passione per la tecnologia e dalla convinzione che ogni grande idea meriti una solida base digitale. Offriamo prodotti e servizi che non sono semplici strumenti, ma catalizzatori di crescita. Il nostro obiettivo è superare le aspettative, fornendo soluzioni affidabili e all'avanguardia che supportino i nostri clienti in ogni fase del loro percorso.</p>
+        </div>
+    </section>
+
+    <section id="shop" class="fade-in">
+        <div class="container">
+            <h2>// SHOP</h2>
+            <div class="shop-grid">
+                <div class="product-card">
+                    <h3>BOT - STANDARD</h3>
+                    <p>Un bot versatile per moderazione e interazione. Codice pulito e ottimizzato per alte prestazioni.</p>
+                    <a href="URL_SERVER_DISCORD" class="buy-btn" target="_blank">ACQUISTA</a>
+                </div>
+                <div class="product-card">
+                    <h3>BOT - PREMIUM</h3>
+                    <p>Funzionalità esclusive, integrazioni personalizzate e supporto prioritario 24/7 per i progetti più complessi.</p>
+                    <a href="URL_SERVER_DISCORD" class="buy-btn" target="_blank">ACQUISTA</a>
+                </div>
+                <div class="product-card">
+                    <h3>HOSTING - BASE</h3>
+                    <p>Server affidabile e sicuro. Ideale per siti web personali, blog e piccole community.</p>
+                    <a href="URL_SERVER_DISCORD" class="buy-btn" target="_blank">ACQUISTA</a>
+                </div>
+                <div class="product-card">
+                    <h3>HOSTING - PRO</h3>
+                    <p>Massime prestazioni, storage illimitato e protezione DDoS avanzata per progetti professionali.</p>
+                    <a href="URL_SERVER_DISCORD" class="buy-btn" target="_blank">ACQUISTA</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="staff" class="fade-in">
+        <div class="container">
+            <h2>// STAFF</h2>
+            <div class="staff-scroll-container">
+                <div class="staff-scroll">
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+1" alt="Membro dello staff 1">
+                        <h4>NOME MEMBRO</h4>
+                        <p>CEO</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+2" alt="Membro dello staff 2">
+                        <h4>NOME MEMBRO</h4>
+                        <p>DEVELOPER</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+3" alt="Membro dello staff 3">
+                        <h4>NOME MEMBRO</h4>
+                        <p>SUPPORT</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+4" alt="Membro dello staff 4">
+                        <h4>NOME MEMBRO</h4>
+                        <p>DESIGNER</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+5" alt="Membro dello staff 5">
+                        <h4>NOME MEMBRO</h4>
+                        <p>MARKETING</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+1" alt="Membro dello staff 1">
+                        <h4>NOME MEMBRO</h4>
+                        <p>CEO</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+2" alt="Membro dello staff 2">
+                        <h4>NOME MEMBRO</h4>
+                        <p>DEVELOPER</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+3" alt="Membro dello staff 3">
+                        <h4>NOME MEMBRO</h4>
+                        <p>SUPPORT</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+4" alt="Membro dello staff 4">
+                        <p>DESIGNER</p>
+                    </div>
+                    <div class="staff-member">
+                        <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Staff+5" alt="Membro dello staff 5">
+                        <h4>NOME MEMBRO</h4>
+                        <p>MARKETING</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="support" class="fade-in">
+        <div class="container">
+            <h2>// SUPPORTO</h2>
+            <p>Per qualsiasi domanda, informazione o richiesta di assistenza, il nostro team di supporto è disponibile 24 ore su 24 sul nostro server Discord. Clicca sul link qui sotto per unirti alla community e ricevere supporto immediato.</p>
+            <a href="URL_SERVER_DISCORD" class="buy-btn" target="_blank">ACCEDI AL SUPPORTO</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 SYNAPSE. TUTTI I DIRITTI RISERVATI.</p>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.2 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            const header = document.querySelector('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
