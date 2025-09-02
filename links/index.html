@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synapse Links</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        :root {
+            --black: #000000;
+            --red: #cc0000;
+            --white: #ffffff;
+            --dark-gray: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: var(--black);
+            padding: 1.5rem 0;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 3px solid var(--red);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            letter-spacing: 2px;
+            color: var(--red);
+            font-weight: 700;
+            animation: red-glow 2s infinite;
+        }
+
+        header nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        header nav ul li {
+            margin-left: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: nav-drop 0.6s ease forwards;
+        }
+
+        header nav ul li:nth-child(1) { animation-delay: 0.1s; }
+        header nav ul li:nth-child(2) { animation-delay: 0.2s; }
+        header nav ul li:nth-child(3) { animation-delay: 0.3s; }
+
+        header nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 700;
+            padding: 8px 12px;
+            transition: color 0.3s ease;
+        }
+
+        header nav ul li a:hover {
+            color: var(--red);
+        }
+
+        .hero {
+            height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: var(--black);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15"><path d="M7 2L9 7L7 12L5 7L7 2Z" fill="rgba(204, 0, 0, 0.2)"/></svg>') repeat;
+            animation: arrow-field 12s linear infinite;
+            opacity: 0.3;
+        }
+
+        .hero .content {
+            z-index: 1;
+            opacity: 0;
+            animation: hero-fade 1.5s ease forwards 0.5s;
+        }
+
+        .hero h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: var(--red);
+            font-weight: 700;
+            animation: title-scale 2s infinite;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 500px;
+            margin: 0 auto;
+            color: var(--white);
+            opacity: 0.8;
+        }
+
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        section {
+            padding: 80px 0;
+            transition: all 0.6s ease;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            color: var(--red);
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        h2::before {
+            content: '→';
+            color: var(--red);
+            position: absolute;
+            left: -25px;
+            animation: arrow-spin 2s infinite;
+        }
+
+        h2::after {
+            content: '←';
+            color: var(--red);
+            position: absolute;
+            right: -25px;
+            animation: arrow-spin 2s infinite reverse;
+        }
+
+        .profile-card {
+            background: var(--dark-gray);
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid var(--red);
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: card-slide-in 0.8s ease forwards;
+        }
+
+        .profile-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 2px solid var(--red);
+            margin-bottom: 15px;
+        }
+
+        .profile-card h3 {
+            font-size: 1.8rem;
+            color: var(--white);
+            margin-bottom: 10px;
+        }
+
+        .profile-card p {
+            font-size: 1rem;
+            color: var(--white);
+            opacity: 0.8;
+        }
+
+        .link-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .link-button {
+            display: block;
+            background: var(--dark-gray);
+            color: var(--white);
+            padding: 15px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            border: 2px solid var(--red);
+            position: relative;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-50px);
+            animation: link-slide 0.7s ease forwards;
+        }
+
+        .link-button:nth-child(1) { animation-delay: 0.2s; }
+        .link-button:nth-child(2) { animation-delay: 0.3s; }
+        .link-button:nth-child(3) { animation-delay: 0.4s; }
+        .link-button:nth-child(4) { animation-delay: 0.5s; }
+
+        .link-button:hover {
+            background: var(--red);
+            color: var(--white);
+            box-shadow: 0 0 10px var(--red);
+        }
+
+        .link-button::after {
+            content: '→';
+            color: var(--red);
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: arrow-slide 1.5s infinite;
+        }
+
+        .server-status {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .server-status span {
+            font-size: 1rem;
+            color: var(--white);
+            background: var(--dark-gray);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid var(--red);
+            display: inline-block;
+            animation: status-pulse 2s infinite;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 40px auto;
+            background: var(--dark-gray);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid var(--red);
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid var(--red);
+            border-radius: 5px;
+            background: var(--black);
+            color: var(--white);
+            font-size: 1rem;
+        }
+
+        .contact-form button {
+            background: var(--red);
+            color: var(--white);
+            padding: 12px 30px;
+            border: 2px solid var(--red);
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .contact-form button:hover {
+            background: transparent;
+            color: var(--red);
+            box-shadow: 0 0 10px var(--red);
+        }
+
+        .contact-form button::after {
+            content: '→';
+            color: var(--red);
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: arrow-slide 1.5s infinite;
+        }
+
+        footer {
+            background: var(--black);
+            padding: 20px 0;
+            text-align: center;
+            border-top: 3px solid var(--red);
+        }
+
+        footer p {
+            font-size: 0.95rem;
+            color: var(--white);
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        @keyframes red-glow {
+            0%, 100% { text-shadow: 0 0 6px var(--red); }
+            50% { text-shadow: 0 0 12px var(--red); }
+        }
+
+        @keyframes nav-drop {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes hero-fade {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes title-scale {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        @keyframes link-slide {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes arrow-slide {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(8px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes arrow-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes arrow-field {
+            0% { background-position: 0 0; }
+            100% { background-position: 30px 30px; }
+        }
+
+        @keyframes status-pulse {
+            0%, 100% { box-shadow: 0 0 5px var(--red); }
+            50% { box-shadow: 0 0 10px var(--red); }
+        }
+
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                gap: 12px;
+            }
+            header nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            header nav ul li {
+                margin: 5px 8px;
+            }
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+            .profile-card img {
+                width: 100px;
+                height: 100px;
+            }
+            h2::before, h2::after {
+                display: none;
+            }
+            .link-button {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>RyzeMC</h1>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#links">Link</a></li>
+                    <li><a href="#contact">Contatti</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <canvas id="hero-canvas"></canvas>
+        <div class="container content">
+            <h2>SYNAPSE LINKS</h2>
+            <p>Facile, veloce e sicuro - hosting professionale ma facile da utilizzare</p>
+        </div>
+    </section>
+
+    <section id="links" class="fade-in">
+        <div class="container">
+            <div class="profile-card">
+                <img src="https://via.placeholder.com/120/333333/ffffff?text=Logo" alt="RyzeMC Logo">
+                <h3>RyzeMC</h3>
+                <p>IP Server: play.ryzemc.org<br>Unisciti alla nostra community Minecraft!</p>
+            </div>
+            <h2>LINK</h2>
+            <div class="link-grid">
+                <a href="URL_DISCORD_SERVER" class="link-button" target="_blank">Discord</a>
+                <a href="URL_SHOP_LINK" class="link-button" target="_blank">Store</a>
+                <a href="URL_SERVER_IP" class="link-button" target="_blank">Login</a>
+                <a href="URL_SUPPORT_LINK" class="link-button" target="_blank">Supporto</a>
+            </div>
+            <div class="server-status">
+                <span>Il tuo cloud personale facile ed efficacie</span>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Synapse®. Tutti i diritti riservati.</p>
+        </div>
+    </footer>
+
+    <script>
+        // 3D Canvas Animation (Minecraft-themed block)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('hero-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const geometry = new THREE.BoxGeometry(2, 2, 2);
+        const material = new THREE.MeshBasicMaterial({ color: 0xcc0000, wireframe: true });
+        const block = new THREE.Mesh(geometry, material);
+        scene.add(block);
+
+        camera.position.z = 5;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            block.rotation.x += 0.01;
+            block.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Intersection Observer for Sections
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.2 });
+
+            sections.forEach(section => observer.observe(section));
+        });
+
+        // Form Submission (Demo Alert)
+        document.querySelector('.contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Messaggio inviato! (Funzionalità demo)');
+        });
+    </script>
+</body>
+</html>
